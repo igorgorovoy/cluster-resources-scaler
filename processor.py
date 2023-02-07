@@ -17,14 +17,16 @@ for name in namespaces:
                         command.run(["kubectl","scale","deployment","-n",name,"--replicas","0","--all"])
                 except Exception as e:
                         print("Skipping due to error",e)
-                
-# Daemonsets scale
-for name in namespaces:
-
-        if name not in exclusionlist:
-                try:
-                        print("Scaling down all deamonset", name)
-                        print("-" * 80)
-                        command.run(["kubectl", "patch", "myDaemonset", "-n", name, "-p", "'{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'"])
+                try:  
+                         daemonsets=command.run(["kubectl","-n", name ,"get","daemonsets","-o","jsonpath={.items[*].metadata.name}"]).output.decode('utf-8').split(" ")          
+                         print(daemonsets)
                 except Exception as e:
-                        print("Skipping due to error", e)
+                       print("Skipping due to error", e)
+            
+                try:
+                        print("Scaling down all deamonset in ", name)
+                        print("-" * 80)
+                        command.run(["kubectl", "patch", "daemonset", "fluentd-elasticsearch", "-n", name, "-p", "{\"spec\": {\"template\": {\"spec\": {\"nodeSelector\": {\"non-existing\": \"true\"}}}}}"])
+                        
+                except Exception as e:
+                       print("Skipping due to error", e)
