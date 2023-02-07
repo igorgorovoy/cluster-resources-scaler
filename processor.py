@@ -67,3 +67,5 @@ for name in namespaces:
 
        except Exception as e:
             print("Skipping due to error in daemonsets loop", e)
+            
+            
