@@ -2,15 +2,15 @@
 import command
 
 
-direction = "up" 
+direction = "down" 
 
 namespaces = command.run(["kubectl", "get", "namespaces", "-o", "jsonpath={.items[*].metadata.name}"]).output.decode(
     'utf-8').split(" ")
 print(namespaces)
 
-exclusionlist = ['argocd', 'cert-manager', 'default', 'experimental', 'istio-ingress', 'istio-system',
-                 'kube-node-lease', 'kube-public', 'kube-system', 'kuna-experimental', 'observability',
-                 'socket-cluster', 'test-helm', 'test-helm2', 'vault', 'vault-webhook']
+exclusionlist = ['argocd', 'cert-manager', 'default',  'istio-ingress', 'istio-system', 'istio-ingress-private'
+                 'kube-node-lease', 'kube-public', 'kube-system', 'kubernetes-dashboard',
+                 'socket-cluster', 'vault', 'vault-webhook', 'test']
 
 # Deployments scale
 for name in namespaces:
