@@ -2,7 +2,7 @@
 import command
 
 
-direction = "down" 
+direction = "up"
 
 namespaces = command.run(["kubectl", "get", "namespaces", "-o", "jsonpath={.items[*].metadata.name}"]).output.decode(
     'utf-8').split(" ")
@@ -27,7 +27,7 @@ for name in namespaces:
        
        try:
            print("Scaling ", direction ," all the deployments in", name)
-           print("-" * 80)
+           print("-" * 180)
            print()
            command.run(["kubectl", "scale", "deployment", "-n", name, "--replicas", str(scale_dir), "--all"])
        except Exception as e:
