@@ -8,7 +8,7 @@ namespaces = command.run(["kubectl", "get", "namespaces", "-o", "jsonpath={.item
     'utf-8').split(" ")
 print(namespaces)
 
-#processList = ['dev', 'stage', 'kuna-pro', 'kuna-pay', 'kuna-bank', 'observability']
+
 
 exclusionlist = ['argocd', 'cert-manager', 'default',  'istio-ingress', 'istio-system', 'istio-ingress-private',
                  'kube-node-lease', 'kube-public', 'kube-system', 'kubernetes-dashboard',
