@@ -1,0 +1,50 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scale-up-job
+spec:
+  schedule: "0 7 * * 1-5" # <7>
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            args:
+              - scale
+              - deployment
+              - -l
+              - environment=dev
+              - --replicas=1
+          serviceAccountName: cicd
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scale-down-job
+spec:
+  schedule: "0 19 * * 1-5"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            args:
+              - scale
+              - deployment
+              - -l
+              - environment=dev
+              - --replicas=0
+          serviceAccountName: cicd
+

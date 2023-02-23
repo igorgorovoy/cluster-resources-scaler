@@ -1,0 +1,83 @@
+#не ве сервисы минимизируются в 2 но для некоторых требование минимум 2.
+# как понять ? и где держать список минимумов для сервиса
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: production
+  name: cron-runner
+rules:
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["patch", "get"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cron-runner
+  namespace: production
+subjects:
+- kind: ServiceAccount
+  name: sa-cron-runner
+  namespace: production
+roleRef:
+  kind: Role
+  name: cron-runner
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-cron-runner
+  namespace: production
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: django-scale-up-job
+  namespace: production
+spec:
+  schedule: "56 11 * * 1-6"
+  successfulJobsHistoryLimit: 0 # Remove after successful completion
+  failedJobsHistoryLimit: 1 # Retain failed so that we see it
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: sa-cron-runner
+          containers:
+          - name: django-scale-up-job
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - kubectl patch hpa LIST_OF_DEPLOYMENTS_SERVICES --patch '{"spec":{"minReplicas":8}}'
+          restartPolicy: OnFailure
+----
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: django-scale-down-job
+  namespace: production
+spec:
+  schedule: "30 20 * * 1-6"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0 # Remove after successful completion
+  failedJobsHistoryLimit: 1 # Retain failed so that we see it
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: sa-cron-runner
+          containers:
+          - name: django-scale-down-job
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - kubectl patch hpa LIST_OF_DEPLOYMENTS_SERVICES --patch '{"spec":{"minReplicas":5}}'
+          restartPolicy: OnFailure
