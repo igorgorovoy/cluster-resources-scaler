@@ -36,35 +36,35 @@ for name in namespaces:
            print("Skipping due to error", e)
         
 
-       # try:
-       #      daemonsets = command.run(
-       #          ["kubectl", "-n", name, "get", "daemonsets", "-o", "jsonpath={.items[*].metadata.name}"]).output.decode(
-       #          'utf-8').split(" ")
-       #      print(daemonsets)
-       #
-       #      for daemon in daemonsets:
-       #          #scale_daemonsets(daemon, "up")
-       #          if direction == "down":
-       #              try:
-       #
-       #                  print("Scaling ", direction, "  deamonset  ", daemon, " in ", name)
-       #                  print("-" * 180)
-       #                  command.run(["kubectl", "patch", "daemonset", daemon, "-n", name, "-p",
-       #                               "{\"spec\": {\"template\": {\"spec\": {\"nodeSelector\": {\"non-existing\": \"true\"}}}}}"])
-       #
-       #              except Exception as e:
-       #                  print("Skipping due to error in scale_daemonsets DOWN", e)
-       #          elif direction == "up":
-       #              try:
-       #
-       #                  print("Scaling ", direction, " deamonset ", daemon, " in ", name)
-       #                  print("-" * 180)
-       #                  command.run(["kubectl", "-n", name, "patch", "daemonset", daemon,  "--type", "json", "-p=[{\"op\": \"remove\", \"path\": \"/spec/template/spec/nodeSelector/non-existing\"}]"])
-       #
-       #              except Exception as e:
-       #                  print("Skipping due to error scale_daemonsets UP", e)
-       #          else:
-       #              print("Skipping. WRONG direction for daemonset")
-       #
-       # except Exception as e:
-       #    print("Skipping due to error in daemonsets loop", e)
+       try:
+            daemonsets = command.run(
+                ["kubectl", "-n", name, "get", "daemonsets", "-o", "jsonpath={.items[*].metadata.name}"]).output.decode(
+                'utf-8').split(" ")
+            print(daemonsets)
+
+            for daemon in daemonsets:
+                #scale_daemonsets(daemon, "up")
+                if direction == "down":
+                    try:
+
+                        print("Scaling ", direction, "  deamonset  ", daemon, " in ", name)
+                        print("-" * 180)
+                        command.run(["kubectl", "patch", "daemonset", daemon, "-n", name, "-p",
+                                     "{\"spec\": {\"template\": {\"spec\": {\"nodeSelector\": {\"non-existing\": \"true\"}}}}}"])
+
+                    except Exception as e:
+                        print("Skipping due to error in scale_daemonsets DOWN", e)
+                elif direction == "up":
+                    try:
+
+                        print("Scaling ", direction, " deamonset ", daemon, " in ", name)
+                        print("-" * 180)
+                        command.run(["kubectl", "-n", name, "patch", "daemonset", daemon,  "--type", "json", "-p=[{\"op\": \"remove\", \"path\": \"/spec/template/spec/nodeSelector/non-existing\"}]"])
+
+                    except Exception as e:
+                        print("Skipping due to error scale_daemonsets UP", e)
+                else:
+                    print("Skipping. WRONG direction for daemonset")
+
+       except Exception as e:
+          print("Skipping due to error in daemonsets loop", e)
