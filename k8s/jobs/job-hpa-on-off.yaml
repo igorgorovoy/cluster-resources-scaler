@@ -37,7 +37,7 @@ metadata:
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: django-scale-up-job
+  name: scale-up-job
   namespace: production
 spec:
   schedule: "56 11 * * 1-6"
@@ -50,7 +50,7 @@ spec:
         spec:
           serviceAccountName: sa-cron-runner
           containers:
-          - name: django-scale-up-job
+          - name: scale-up-job
             image: bitnami/kubectl:latest
             command:
             - /bin/sh

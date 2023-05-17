@@ -2,7 +2,7 @@
 import command
 
 
-direction = "down"
+direction = "up"
 
 namespaces = command.run(["kubectl", "get", "namespaces", "-o", "jsonpath={.items[*].metadata.name}"]).output.decode(
     'utf-8').split(" ")
