@@ -10,9 +10,8 @@ print(namespaces)
 
 
 
-exclusionlist = ['argocd', 'cert-manager', 'default',  'istio-ingress', 'istio-system', 'istio-ingress-private',
-                 'kube-node-lease', 'kube-public', 'kube-system', 'kubernetes-dashboard',
-                 'socket-cluster', 'vault', 'vault-webhook', 'test']
+exclusionlist = ['default',   'kube-node-lease', 'kube-public', 'kube-system']
+#'istio-ingress', 'istio-system', 'istio-ingress-private',
 
 # Deployments scale
 for name in namespaces:
@@ -34,7 +33,43 @@ for name in namespaces:
            command.run(["kubectl", "-n", name, "scale", "deployment", "--replicas", str(scale_dir), "--all"])
        except Exception as e:
            print("Skipping due to error", e)
-        
+
+       try:
+           print("-" * 180)
+           print()
+           print("Statefulsets  .... ")
+           stateful_sets = command.run(
+               ["kubectl", "-n", name, "get", "statefulsets", "-o", "jsonpath={.items[*].metadata.name}" ]).output.decode(
+               'utf-8').split(" ")
+           print(stateful_sets)
+           print("-" * 180)
+           print()
+           for daemon in stateful_sets:
+               # scale_daemonsets(daemon, "up")
+               if direction == "down":
+                   try:
+
+                       print("Scaling ", direction, "  statefulsets  ", daemon, " in ", name)
+                       print("-" * 180)
+                       command.run(["kubectl", "patch", "statefulset", daemon, "-n", name, "-p",
+                                    "{\"spec\": {\"template\": {\"spec\": {\"nodeSelector\": {\"non-existing\": \"true\"}}}}}"])
+
+                   except Exception as e:
+                       print("Skipping due to error in scale_daemonsets DOWN", e)
+               elif direction == "up":
+                   try:
+
+                       print("Scaling ", direction, " deamonset ", daemon, " in ", name)
+                       print("-" * 180)
+                       command.run(["kubectl", "-n", name, "patch", "daemonset", daemon, "--type", "json",
+                                    "-p=[{\"op\": \"remove\", \"path\": \"/spec/template/spec/nodeSelector/non-existing\"}]"])
+
+                   except Exception as e:
+                       print("Skipping due to error scale_daemonsets UP", e)
+               else:
+                   print("Skipping. WRONG direction for daemonset")
+       except Exception as e:
+           print("Skipping due to error", e)
 
        try:
             daemonsets = command.run(
@@ -66,5 +101,8 @@ for name in namespaces:
                 else:
                     print("Skipping. WRONG direction for daemonset")
 
+
+
        except Exception as e:
           print("Skipping due to error in daemonsets loop", e)
+
